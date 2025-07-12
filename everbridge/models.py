@@ -1,9 +1,9 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from datetime import datetime
 
 
 class Sender(BaseModel):
-    id: str
+    id: int
 
 
 class Setting(BaseModel):
@@ -22,7 +22,7 @@ class State(BaseModel):
 
 
 class Notification(BaseModel):
-    id: str
+    id: int
     title: str
     body: str
     priority: bool
@@ -35,6 +35,6 @@ class Notification(BaseModel):
     createdAt: datetime
     expiredAt: datetime
 
-    @validator('createdAt', 'expiredAt', pre=True)
+    @field_validator("createdAt", "expiredAt", mode="before")
     def convert_timestamp_to_datetime(cls, value):
         return datetime.fromtimestamp(value / 1000)
