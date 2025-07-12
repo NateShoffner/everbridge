@@ -4,8 +4,8 @@ from .models import Notification
 
 BASE_URL = "https://api.everbridge.net/digitalapps/v2"
 
-class EverbridgeClient:
 
+class EverbridgeClient:
     def __init__(self, username: str, password: str):
         self.username = username
         self.password = password
@@ -30,23 +30,20 @@ class EverbridgeClient:
             async with session.post(url, headers=headers, data=payload) as response:
                 r_json = await response.json()
 
-
-        print(r_json)
-
         return r_json
-    
+
     async def get_notifications(self):
-        """ Get all notifications """
+        """Get all notifications"""
         r_json = await self.get_access_token()
-        
-        access_token = r_json['accessToken']
-        client_id = r_json['clientId']
+
+        access_token = r_json["accessToken"]
+        client_id = r_json["clientId"]
 
         url = f"{BASE_URL}/notifications/messages"
 
         headers = {
             "accept": "application/json",
-            "Authorization": "token " + access_token['value'],
+            "Authorization": "token " + access_token["value"],
             "Client-Id": client_id,
         }
 
@@ -57,19 +54,19 @@ class EverbridgeClient:
         notifications = [Notification(**item) for item in r_json]
 
         return notifications
-    
+
     async def get_notification(self, notification_id: str):
-        """ Get a single notification by its ID """
+        """Get a single notification by its ID"""
         r_json = await self.get_access_token()
-        
-        access_token = r_json['accessToken']
-        client_id = r_json['clientId']
+
+        access_token = r_json["accessToken"]
+        client_id = r_json["clientId"]
 
         url = f"{BASE_URL}/notifications/messages/{notification_id}"
 
         headers = {
             "accept": "application/json",
-            "Authorization": "token " + access_token['value'],
+            "Authorization": "token " + access_token["value"],
             "Client-Id": client_id,
         }
 
@@ -80,19 +77,19 @@ class EverbridgeClient:
         notification = Notification(**r_json)
 
         return notification
-    
+
     async def get_events(self):
-        """ Get all events """
+        """Get all events"""
         r_json = await self.get_access_token()
-        
-        access_token = r_json['accessToken']
-        client_id = r_json['clientId']
+
+        access_token = r_json["accessToken"]
+        client_id = r_json["clientId"]
 
         url = f"{BASE_URL}/events"
 
         headers = {
             "accept": "application/json",
-            "Authorization": "token " + access_token['value'],
+            "Authorization": "token " + access_token["value"],
             "Client-Id": client_id,
         }
 
