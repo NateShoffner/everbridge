@@ -1,6 +1,6 @@
 import aiohttp
 
-from .models import Notification
+from .models import Notification, AccessTokenResponse
 
 BASE_URL = "https://api.everbridge.net/digitalapps/v2"
 
@@ -13,7 +13,8 @@ class EverbridgeClient:
         self.access_token = None
         self.expires_at = None
 
-    async def get_access_token(self):
+    async def get_access_token(self) -> AccessTokenResponse:
+        """Get access token using username and password"""
         url = f"{BASE_URL}/authorizations/oauth2/token"
 
         headers = {
@@ -30,21 +31,18 @@ class EverbridgeClient:
             async with session.post(url, headers=headers, data=payload) as response:
                 r_json = await response.json()
 
-        return r_json
+        return AccessTokenResponse(**r_json)
 
-    async def get_notifications(self):
+    async def get_notifications(self) -> list[Notification]:
         """Get all notifications"""
-        r_json = await self.get_access_token()
-
-        access_token = r_json["accessToken"]
-        client_id = r_json["clientId"]
+        token_response = await self.get_access_token()
 
         url = f"{BASE_URL}/notifications/messages"
 
         headers = {
             "accept": "application/json",
-            "Authorization": "token " + access_token["value"],
-            "Client-Id": client_id,
+            "Authorization": f"token {token_response.accessToken.value}",
+            "Client-Id": token_response.clientId,
         }
 
         async with aiohttp.ClientSession() as session:
@@ -55,19 +53,16 @@ class EverbridgeClient:
 
         return notifications
 
-    async def get_notification(self, notification_id: str):
+    async def get_notification(self, notification_id: str) -> Notification:
         """Get a single notification by its ID"""
-        r_json = await self.get_access_token()
-
-        access_token = r_json["accessToken"]
-        client_id = r_json["clientId"]
+        token_response = await self.get_access_token()
 
         url = f"{BASE_URL}/notifications/messages/{notification_id}"
 
         headers = {
             "accept": "application/json",
-            "Authorization": "token " + access_token["value"],
-            "Client-Id": client_id,
+            "Authorization": f"token {token_response.accessToken.value}",
+            "Client-Id": token_response.clientId,
         }
 
         async with aiohttp.ClientSession() as session:
@@ -77,24 +72,3 @@ class EverbridgeClient:
         notification = Notification(**r_json)
 
         return notification
-
-    async def get_events(self):
-        """Get all events"""
-        r_json = await self.get_access_token()
-
-        access_token = r_json["accessToken"]
-        client_id = r_json["clientId"]
-
-        url = f"{BASE_URL}/events"
-
-        headers = {
-            "accept": "application/json",
-            "Authorization": "token " + access_token["value"],
-            "Client-Id": client_id,
-        }
-
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers) as response:
-                r_json = await response.json()
-
-        return r_json
